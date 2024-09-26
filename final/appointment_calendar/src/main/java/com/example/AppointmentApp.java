@@ -22,7 +22,7 @@ public class AppointmentApp extends Application {
     private Calendar calendar = new Calendar();
     private ListView<String> appointmentList = new ListView<>();
     private YearMonth currentYearMonth = YearMonth.now();
-    private VBox layout; // Store the VBox layout reference
+    private VBox layout; // Initialize this field
 
     // Additional fields for editing
     private Appointment selectedAppointment = null;
@@ -77,7 +77,6 @@ public class AppointmentApp extends Application {
 
         // Calendar Grid View for the current month
         GridPane calendarGrid = new GridPane();
-        displayCalendarForMonth(currentYearMonth);
 
         // Handle selecting an appointment for editing
         appointmentList.setOnMouseClicked(event -> {
@@ -102,7 +101,10 @@ public class AppointmentApp extends Application {
                 String newDescription = descriptionField.getText();
 
                 Appointment newAppointment = new Appointment(newDate, newStartTime, newEndTime, newDescription);
-                calendar.updateAppointment(selectedAppointment, newAppointment);
+
+                // Remove the old appointment before adding the new one
+                calendar.removeAppointment(selectedAppointment);
+                calendar.addAppointment(newAppointment);
 
                 displayCalendarForMonth(currentYearMonth);
                 selectedAppointment = null; // Reset the selected appointment
@@ -113,6 +115,7 @@ public class AppointmentApp extends Application {
         // Delete appointment event
         deleteButton.setOnAction(e -> {
             if (selectedAppointment != null) {
+                // Remove only the selected appointment, not all appointments for the day
                 calendar.removeAppointment(selectedAppointment);
                 displayCalendarForMonth(currentYearMonth);
                 selectedAppointment = null; // Reset the selected appointment
@@ -120,8 +123,8 @@ public class AppointmentApp extends Application {
             }
         });
 
-        // Initialize the VBox and store a reference to it
-        layout = new VBox(10); // Store the reference
+        // Initialize the VBox layout and store a reference to it
+        layout = new VBox(10);
         layout.setPadding(new Insets(20));
         layout.getChildren().addAll(new Label("Date:"), datePicker,
                                     new Label("Start Time:"), startTimeField,
@@ -130,6 +133,10 @@ public class AppointmentApp extends Application {
                                     addButton, showButton, editButton, deleteButton,
                                     appointmentList, calendarGrid);
 
+        // Create the initial calendar view
+        displayCalendarForMonth(currentYearMonth);
+
+        // Set up the scene and show the stage
         Scene scene = new Scene(layout, 500, 700);
         primaryStage.setScene(scene);
         primaryStage.show();
